@@ -41,7 +41,7 @@ end
 
 close(h)
 
-figure(1)
+figure(1) % creates a phase diagram for minimum H
 imagesc(log10(betaN),log10(betaD),log10(Hmin));
 set(gca,'YDir','normal')
 xlabel('log(\beta_N)','fontsize',14);
@@ -49,7 +49,7 @@ ylabel('log(\beta_D)','fontsize',14);
 title('log(H_{min})','fontsize',14)
 colorbar
 
-figure(2)
+figure(2) % creates a phase diagram for Hmax/Hmin with >1 indicating patterning
 imagesc(log10(betaN),log10(betaD),log10(Hmax./Hmin));
 set(gca,'YDir','normal')
 xlabel('log(\beta_N)','fontsize',14);
@@ -57,7 +57,7 @@ ylabel('log(\beta_d3)','fontsize',14);
 title('log(H_{max}/H_{min})','fontsize',14)
 colorbar
 
-figure(3)
+figure(3) % creates a phase diagram for maximum H
 imagesc(log10(betaN),log10(betaD),log10(Hmax));
 set(gca,'YDir','normal')
 xlabel('log(\beta_d)','fontsize',14);
@@ -122,10 +122,10 @@ D3 = y(3*k+1:4*k);  % levels of DLL3 in cells 1 to k
 Dneighbor=M*y(1:k);       % Delta level in the neighboring cells
 Nneighbor=M*y(2*k+1:3*k); % Notch level in the neighboring cells
 
-dN = betaN - Y.*N - N.*Dneighbor./kt - N.*D3./ke - N.*D./kc;
-dD = betaD*kdr./(kdr + R.^m) - Y.*D - Nneighbor.*D./kt- N.*D./kc;
-dD3 = betaD3 - 1*Y.*D3 - N.*D3./ke;
-dR = betaH.*(N.*Dneighbor./(kt*Ys)).^p./(krs + (N.*Dneighbor./(kt*Ys)).^p) - Yr.*R;
+dN = betaN - Y.*N - N.*Dneighbor./kt - N.*D3./ke - N.*D./kc; % Differential equation for notch receptors
+dD = betaD*kdr./(kdr + R.^m) - Y.*D - Nneighbor.*D./kt- N.*D./kc; % Differential equation for DLL1
+dD3 = betaD3 - 1*Y.*D3 - N.*D3./ke; % Differential equation for DLL3
+dR = betaH.*(N.*Dneighbor./(kt*Ys)).^p./(krs + (N.*Dneighbor./(kt*Ys)).^p) - Yr.*R; %Differential equation for HES1
 dy = [dD;dR;dN;dD3];
 
 function params=defaultparams
@@ -150,7 +150,7 @@ params.P=12;
 params.Q=12;
 
 
-function M=getconnectivityM(P,Q)
+function M=getconnectivityM(P,Q) %This function creates connectivity matrix for cell lattice
 
 k=P*Q; % number of cells
 M=zeros(k,k); % connectivity matrix
