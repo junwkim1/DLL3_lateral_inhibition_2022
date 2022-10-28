@@ -41,12 +41,12 @@ F=movielattice(tout,yout,P,Q,k);
 
 function dy = li(t,y,params) 
 
-betaD=params.betaD;%
-betaN=params.betaN;%
-betaR=params.betaR;%
-betaD3=params.betaD3;
-m=params.m;%
-M=params.connectivity;
+betaD=params.betaD;% Parameters for DLL1
+betaN=params.betaN;% Parameters for notch receptor
+betaR=params.betaR;% Parameters for HES1
+betaD3=params.betaD3;% Parameters for DLL3
+m=params.m;% Cooperativity parameter m
+M=params.connectivity;% Connectivity matrix used to identify neighboring cells
 k=length(M);
 kc=params.kc;%
 kt=params.kt;%
@@ -55,18 +55,19 @@ ke=params.ke;
 kdr=params.kdr;
 kf=params.kf;
 Ys=params.Ys;
-p=params.p;
+p=params.p;% Cooperativity parameter p
 krs=params.krs;
 Yr=params.Yr;
 
-D = y(1:k);         % levels of Delta in cells 1 to k
+D = y(1:k);         % levels of DLL1 (representative classical notch ligant) in cells 1 to k
 R = y(k+1:2*k);     % levels of HES1 (Repressor in Formosa-Jordan and Sprinzak, 2014) in cells 1 to k
-N = y(2*k+1:3*k);   % levels of Notch in cells 1 to k
+N = y(2*k+1:3*k);   % levels of notch receptors in cells 1 to k
 D3 = y(3*k+1:4*k);  % levels of DLL3 in cells 1 to k
 
-Dneighbor=M*y(1:k);       % Delta level in the neighboring cells
-Nneighbor=M*y(2*k+1:3*k); % Notch level in the neighboring cells
+Dneighbor=M*y(1:k);       % DLL1 level in the neighboring cells
+Nneighbor=M*y(2*k+1:3*k); % Notch receptor level in the neighboring cells
 
+% Differential equations for notch receptor, DLL1, DLL3, and HES1 
 dN = betaN - Y.*N - N.*Dneighbor./kt - N.*D3./ke- N.*D./kc;
 dD = betaD*kdr./(kdr + R.^m) - Y.*D - Nneighbor.*D./kt - N.*D./kc;
 dD3 = betaD3 - 1*Y.*D3- N.*D3./ke ;
@@ -113,13 +114,13 @@ function y0=getIC(params,k)
 
 U=rand(k,1) - 1/2; % a uniform random distribution
 epsilon=1e-5;   % multiplicative factor of Delta initial condition
-D0=epsilon*params.betaD.*(1 + params.sigma*U); % initial Delta levels 
-R0=zeros(k,1);  % initial repressor levels
-N0=params.betaN.*(1 + params.sigma*U);  % initial Notch levels 
+D0=epsilon*params.betaD.*(1 + params.sigma*U); % initial DLL1 levels 
+R0=zeros(k,1);  % initial HES1 levels
+N0=params.betaN.*(1 + params.sigma*U);  % initial notch receptor levels 
 D30=epsilon*params.betaD3.*(1 + params.sigma*U); % initial DLL3 levels
 y0=[D0;R0;N0;D30];  % vector of initial conditions
 
-function plot2cells(tout,yout,k)
+function plot2cells(tout,yout,k) % Plotting time trace of cells
 
 figure(1)
 clf
@@ -133,7 +134,6 @@ for i=1:k
     legend('Hes1')
     set(gca,'FontSize',15)
 end
-print -painters -depsc testOnMac.eps
 
 function out = findneighborhex(ind,P,Q)
 [p,q] = ind2pq(ind,P);
@@ -186,7 +186,7 @@ c=min(c,ones(1,3));
 
 patch(x,y,c,'linewidth',2);
 
-function F=movielattice(tout,yout,P,Q,k)
+function F=movielattice(tout,yout,P,Q,k) % This function shows a time course movie of cell lattice
 
 figure(4)
 sy1 = sort(yout(end,1+k:2*k));
